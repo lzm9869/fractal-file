@@ -18,7 +18,8 @@ class Vertex:
 
 class Graph:
     # an object that is simply a list of vertices
-    vertices = []
+    def __init__(self):
+        self.vertices = []
 
     def add_vertex(self, vertex):
     # allows you to add vertices to a graph
@@ -45,14 +46,16 @@ class Graph:
 
 # test code
 g = Graph()
+f = Graph()
 a = Vertex("a")
 b = Vertex("b")
 c = Vertex("c")
+d = Vertex("d")
 g.add_vertex(a)
 g.add_vertex(b)
 g.add_vertex(c)
+f.add_vertex(d)
 g.add_edge(a, b, 3)
 g.add_edge(a, c, 2)
 g.print_graph()
-
-
+f.print_graph()
