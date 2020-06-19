@@ -38,6 +38,10 @@ class Graph:
         else:
             return False
     
+    def add_graph(self, g):
+        for v in g.vertices:
+            self.add_vertex(v)
+    
     def print_graph(self):
         for i in range(len(self.vertices)):
             print(self.vertices[i].name + " has neighbors and weights as follows:")
@@ -45,6 +49,7 @@ class Graph:
                 print(self.vertices[i].neighbors[j].name + " " + str(self.vertices[i].weights[j]))
 
 # test code
+'''
 g = Graph()
 f = Graph()
 a = Vertex("a")
@@ -55,7 +60,9 @@ g.add_vertex(a)
 g.add_vertex(b)
 g.add_vertex(c)
 f.add_vertex(d)
+f.add_graph(g)
 g.add_edge(a, b, 3)
 g.add_edge(a, c, 2)
 g.print_graph()
 f.print_graph()
+'''
