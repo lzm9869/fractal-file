@@ -1,5 +1,6 @@
 import turtle as t
 
+
 def draw_sierpinski_triangle(length, level):
     if level == 0:
         t.color('red', 'yellow')
