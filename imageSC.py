@@ -1,12 +1,10 @@
 import turtle as t
 
-
 def draw_sierpinski_triangle(length, level):
     if level == 0:
         t.color('red', 'yellow')
         t.begin_fill()
         for i in range(0, 3):
-
             t.fd(length)
             t.left(120)
         t.end_fill()
