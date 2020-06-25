@@ -1,3 +1,6 @@
+import numpy as np
+import math
+
 class Vertex:
     # an object with a name, a list of neighbors, and a list of weights
     # name is a string that the vertex is refered to
@@ -9,14 +12,12 @@ class Vertex:
     def __init__(self, n):
         self.name = n
         self.neighbors = list()
-        self.weights = list()
-        self.position = list()
+        self.position = np.array()
     
     # if there are optimization problems, might be able to change this so that the neighbor lists are lists of strings, not Vertex objects
-    def add_neighbor(self, v, w):
+    def add_neighbor(self, v):
         if v not in self.neighbors:
             self.neighbors.append(v)
-            self.weights.append(w)
 
 class Graph:
     # an object that is simply a list of vertices
@@ -32,27 +33,33 @@ class Graph:
         else:
             return False
     
-    def add_edge(self, u, v, w):
+    def add_edge(self, u, v):
     # allows you to add edges to vertices in a graph
     # checks that both vertices (u, v) are in the graph, then makes them neighbors of each other with the desired weight (w)
         if u in self.vertices and v in self.vertices:
-            u.add_neighbor(v, w)
-            v.add_neighbor(u, w)
+            u.add_neighbor(v)
+            v.add_neighbor(u)
             return True
         else:
             return False
     
     def contract_graph(self, scale, fixedPoint):
+    # contracts a graph by a scale towards a fixed point
+    # since v.position and fixedPoint are numpy arrays, the formula written works
+    # NOTICE: will need to change this once the code is modified for affine graphs
         for v in self.vertices:
-            v.weight = [x.weight / scale for x in v.weight]
-            v.position[0] = scale * (v.position[0] - fixedPoint[0]) + fixedPoint[0]
-            v.position[1] = scale * (v.position[1] - fixedPoint[1]) + fixedPoint[1]
+            v.position = scale * (v.position - fixedPoint) + fixedPoint
 
     def combine_vertices(self, u, v):
     # little sloppy but should work for our purposes
-        u.neighbors.append(n for n in v.neighbors)
-        u.neighbors.append(w for w in v.weights)
+        pointsWithVAsNeighbor = list()
+        for n in v.neighbors:
+            pointsWithVAsNeighbor.append(n)
+            u.neighbors.append(n)
         self.vertices.remove(v)
+        for p in pointsWithVAsNeighbor:
+            p.neighbors.remove(v)
+            p.neighbors.append(u)
 
     def add_graph(self, g):
     # copies all the Vertex objects from a graph to another graph
@@ -61,39 +68,48 @@ class Graph:
     
     def remove_redundencies(self):
     # combines any points with the same position
+    # this seems to have a high complexity, which may cause problems
         repeatedPoints = set()
-        seenPoints = set()
+        seenPoints = list()
         for v in self.vertices:
+        # because of the way this is written, the second vertex in self.vertices is added to repeated points, which is relevant for the second loop
             if v.position not in seenPoints:
-                seenPoints.add(v.position)
+                seenPoints.append(v.position)
             else:
                 repeatedPoints.add(v)
         for p in repeatedPoints:
-            # work on this some other time
-            pass
-
+        # because the second instance is in repeated points, only need to relocate the first
+        # note: the first point with the position found is kept
+            for v in seenPoints:
+                if v.position == p.position:
+                    self.combine_vertices(p, v)
+                    break
 
     def print_graph(self):
         for i in range(len(self.vertices)):
-            print(self.vertices[i].name + " has neighbors and weights as follows:")
-            for j in range(len(self.vertices[i].neighbors)):
-                print(self.vertices[i].neighbors[j].name + " " + str(self.vertices[i].weights[j]))
+            print(self.vertices[i].name + " is in position " + self.vertices[i].position + " and has neighbors " + self.vertices[i].neighbors)
 
 # test code
-'''
+
 g = Graph()
 f = Graph()
-a = Vertex("a")
-b = Vertex("b")
-c = Vertex("c")
-d = Vertex("d")
+a = Vertex("a1")
+b = Vertex("b1")
+c = Vertex("c1")
+d = Vertex("d1")
+a.position = np.array([0, 0])
+b.position = np.array([1, 0])
+c.position = np.array([0, 1])
+d.position = np.array([0, 0])
+# a and d should be combined
 g.add_vertex(a)
 g.add_vertex(b)
 g.add_vertex(c)
-f.add_vertex(d)
-f.add_graph(g)
-g.add_edge(a, b, 3)
-g.add_edge(a, c, 2)
+g.add_vertex(d)
+g.add_edge(a, b)
+g.add_edge(c, d)
+print("graph 1")
 g.print_graph()
-f.print_graph()
-'''
+g.remove_redundencies()
+print("graph 2")
+g.print_graph()
