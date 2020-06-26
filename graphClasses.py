@@ -100,7 +100,7 @@ class Graph:
 
 
 # test code
-
+"""
 g = Graph()
 f = Graph()
 a = Vertex("a1")
@@ -123,3 +123,4 @@ g.print_graph()
 g.remove_redundancies()
 print("graph 2")
 g.print_graph()
+"""
