@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 
 class Vertex:
@@ -14,6 +15,7 @@ class Vertex:
         self.name = n
         self.neighbors = list()
         self.position = None
+        self.harmonicValue = None
 
     # if there are optimization problems, might be able to change this so that the neighbor lists
     #   are lists of strings, not Vertex objects
@@ -89,6 +91,31 @@ class Graph:
                     self.combine_vertices(p, u)
                     break
 
+    def apply_harmonic_function(self):
+        for v in self.vertices:
+            v.harmonicValue = v.position[0]  # starts with the function f(x, y) = x
+        greatestDifference = 1
+        desiredAccuracy = .00000001
+        while greatestDifference > desiredAccuracy:
+            greatestDifference = 0
+            for u in self.vertices:
+                if not (u.harmonicValue == 0 or u.harmonicValue == 1):
+                    oldHarmonicValue = copy.deepcopy(u.harmonicValue)
+                    listOfHarmonicValues = []
+                    for n in u.neighbors:
+                        listOfHarmonicValues.append(n.harmonicValue)
+                    u.harmonicValue = sum(listOfHarmonicValues) / len(listOfHarmonicValues)
+                    differenceBetweenHarmonicValues = abs(oldHarmonicValue - u.harmonicValue)
+                    if differenceBetweenHarmonicValues > greatestDifference:
+                        greatestDifference = differenceBetweenHarmonicValues
+
+    def energy_of_graph(self):
+        totalOfSquaredDifferences = 0
+        for v in self.vertices:
+            for n in v.neighbors:
+                totalOfSquaredDifferences += (v.harmonicValue - n.harmonicValue)**2
+        return totalOfSquaredDifferences / 2
+
     def print_graph(self):
         for i in range(len(self.vertices)):
             print(self.vertices[i].name + " has neighbors:")
@@ -96,6 +123,8 @@ class Graph:
                 print(n.name)
             print("and is in position:")
             print(self.vertices[i].position)
+            print("and has a harmonic function value of:")
+            print(self.vertices[i].harmonicValue)
             print()
 
 

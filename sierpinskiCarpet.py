@@ -45,6 +45,8 @@ for i in range(0, 8):
 
 
 sC1.remove_redundancies()
+sC1.apply_harmonic_function()
 for v in sC1.vertices:
     print(v.name)
 sC1.print_graph()
+print(sC1.energy_of_graph())
