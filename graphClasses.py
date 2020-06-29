@@ -57,14 +57,15 @@ class Graph:
 
     def combine_vertices(self, u, v):
         # little sloppy but should work for our purposes
-        pointsWithVAsNeighbor = list()
-        for n in v.neighbors:
-            pointsWithVAsNeighbor.append(n)
-            u.neighbors.append(n)
-        self.vertices.remove(v)
-        for p in pointsWithVAsNeighbor:
-            p.neighbors.remove(v)
-            p.neighbors.append(u)
+        if v in self.vertices and u in self.vertices:
+            pointsWithVAsNeighbor = list()
+            for n in v.neighbors:
+                pointsWithVAsNeighbor.append(n)
+                u.neighbors.append(n)
+            self.vertices.remove(v)
+            for p in pointsWithVAsNeighbor:
+                p.neighbors.remove(v)
+                p.neighbors.append(u)
 
     def add_graph(self, g):
         # copies all the Vertex objects from a graph to another graph
@@ -95,7 +96,7 @@ class Graph:
         for v in self.vertices:
             v.harmonicValue = v.position[0]  # starts with the function f(x, y) = x
         greatestDifference = 1
-        desiredAccuracy = .00000001
+        desiredAccuracy = .0000001
         while greatestDifference > desiredAccuracy:
             greatestDifference = 0
             for u in self.vertices:
@@ -109,12 +110,12 @@ class Graph:
                     if differenceBetweenHarmonicValues > greatestDifference:
                         greatestDifference = differenceBetweenHarmonicValues
 
-    def energy_of_graph(self):
+    def resistance_of_graph(self):
         totalOfSquaredDifferences = 0
         for v in self.vertices:
             for n in v.neighbors:
                 totalOfSquaredDifferences += (v.harmonicValue - n.harmonicValue)**2
-        return totalOfSquaredDifferences / 2
+        return 1 / (totalOfSquaredDifferences / 2)
 
     def print_graph(self):
         for i in range(len(self.vertices)):
@@ -126,6 +127,10 @@ class Graph:
             print("and has a harmonic function value of:")
             print(self.vertices[i].harmonicValue)
             print()
+
+    def print_vertices_x_y_f(self):
+        for i in range(len(self.vertices)):
+            print(self.vertices[i].name, self.vertices[i].position, self.vertices[i].harmonicValue)
 
 
 # test code

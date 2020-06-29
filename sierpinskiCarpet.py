@@ -2,6 +2,9 @@ import numpy as np
 import graphClasses as gc
 import copy
 
+#  INPUT HERE what level precarpet would you like?
+precarpet_level = 2
+
 # building the level 0 cross carpet
 sC0 = gc.Graph()
 a = gc.Vertex("a")
@@ -24,9 +27,8 @@ sC0.add_edge(b, e)
 sC0.add_edge(c, e)
 sC0.add_edge(d, e)
 
-# building a level 1 carpet
-# making 8 smaller copies of sc0
-sC1 = gc.Graph()
+sCn = copy.deepcopy(sC0)
+sCn_plus_one = gc.Graph()
 scalingFactor = 1 / 3  # how much longer each graph connection is compared to its n+1 carpet counterpart
 listOfFixedPoints = [np.array([0, 0]),  # q0
                      np.array([0.5, 0]),  # q1
@@ -36,17 +38,21 @@ listOfFixedPoints = [np.array([0, 0]),  # q0
                      np.array([0.5, 1]),  # q5
                      np.array([0, 1]),  # q6
                      np.array([0, 0.5])]  # q7
-for i in range(0, 8):
-    copyOfSC0 = copy.deepcopy(sC0)
-    for j in range(len(copyOfSC0.vertices)):
-        copyOfSC0.vertices[j].name = copyOfSC0.vertices[j].name + str(i)
-    copyOfSC0.contract_graph(scalingFactor, listOfFixedPoints[i])
-    sC1.add_graph(copyOfSC0)
 
+for k in range(precarpet_level):
+    sCn_plus_one = gc.Graph()
+    for i in range(0, 8):
+        copyOfSCn = copy.deepcopy(sCn)
+        for j in range(len(copyOfSCn.vertices)):
+            copyOfSCn.vertices[j].name = copyOfSCn.vertices[j].name + str(i)
+        copyOfSCn.contract_graph(scalingFactor, listOfFixedPoints[i])
+        sCn_plus_one.add_graph(copyOfSCn)
+    sCn_plus_one.remove_redundancies()
+    sCn = copy.deepcopy(sCn_plus_one)
 
-sC1.remove_redundancies()
-sC1.apply_harmonic_function()
-for v in sC1.vertices:
+sCn_plus_one.apply_harmonic_function()
+for v in sCn_plus_one.vertices:
     print(v.name)
-sC1.print_graph()
-print(sC1.energy_of_graph())
+sCn_plus_one.print_graph()
+sCn_plus_one.print_vertices_x_y_f()
+print("Resistance of the graph is", sCn_plus_one.resistance_of_graph())
