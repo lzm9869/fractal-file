@@ -11,6 +11,12 @@ class Graph:
     def __init__(self):
         self.vertices = {}
 
+    def __deepcopy__(self, memodict={}):
+        theCopy = Graph()
+        for v in self.vertices:
+            theCopy.vertices[v] = copy.deepcopy(self.vertices[v])
+        return theCopy
+
     # noinspection PyUnusedLocal
     def add_vertex(self, name, xyCoordinates):
         # allows you to add vertices to a graph
@@ -32,7 +38,7 @@ class Graph:
         # since v[1] (the position) and fixedPoint are numpy arrays, the formula written works
         # NOTICE: will need to change this once the code is modified for affine graphs
         for v in self.vertices:
-            self.vertices[v][1] = scale * (self.vertices[v][1] - fixedPoint) + self.vertices[v][1]
+            self.vertices[v][1] = scale * (self.vertices[v][1] - fixedPoint) + fixedPoint
 
     def combine_vertices(self, u, v):
         for n in self.vertices[v][0]:
@@ -44,6 +50,8 @@ class Graph:
 
     def update_all_vertices_names(self, update):
         self.vertices = {key+update: value for key, value in self.vertices.items()}
+        for v in self.vertices:
+            self.vertices[v][0] = [n+update for n in self.vertices[v][0]]
 
     def add_graph(self, gr):
         # copies all the Vertex objects from a graph to another graph
@@ -67,18 +75,20 @@ class Graph:
             for u in seenPoints:
                 if np.allclose(self.vertices[p][1], self.vertices[u][1]):
                     self.combine_vertices(p, u)
+                    seenPoints.remove(u)
                     break
 
     def apply_harmonic_function(self):
         for v in self.vertices:
             self.vertices[v][2] = self.vertices[v][1][0]  # starts with the function f(x, y) = x
         greatestDifference = 1
-        desiredAccuracy = .0000001
+        desiredAccuracy = .01
         while greatestDifference > desiredAccuracy:
+            print(greatestDifference)
             greatestDifference = 0
             for u in self.vertices:
                 if not (self.vertices[u][2] == 0 or self.vertices[u][2] == 1):
-                    oldHarmonicValue = int(self.vertices[u][2])
+                    oldHarmonicValue = copy.deepcopy(self.vertices[u][2])
                     listOfHarmonicValues = []
                     for n in self.vertices[u][0]:
                         listOfHarmonicValues.append(self.vertices[n][2])
@@ -111,20 +121,15 @@ class Graph:
 
 
 # test code
-'''g = Graph()
-f = Graph()
+'''
+g = Graph()
 g.add_vertex("a", [0, 0])
 g.add_vertex("b", [1, 0])
 g.add_vertex("c", [1, 1])
 g.add_vertex("d", [1, 0])
-f.add_vertex("e", [5, 5])
-f.add_vertex("h", [2, 2])
 g.add_edge("a", "b")
 g.add_edge("c", "d")
-f.add_edge("e", "h")
-g.add_graph(f)
-g.update_vertex_name("b", "t")
-print("graph 1")
+g.contract_graph(1/2, [.5, .5])
 g.remove_redundancies()
 g.print_graph()
 g.print_vertices_x_y_f()'''
