@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+from scipy.spatial import distance
 
 
 class Graph:
@@ -35,10 +36,15 @@ class Graph:
 
     def contract_graph(self, scale, fixedPoint):
         # contracts a graph by a scale towards a fixed point
-        # since v[1] (the position) and fixedPoint are numpy arrays, the formula written works
-        # NOTICE: will need to change this once the code is modified for affine graphs
+        # since position and fixedPoint are numpy arrays, the formula written works
         for v in self.vertices:
             self.vertices[v][1] = scale * (self.vertices[v][1] - fixedPoint) + fixedPoint
+
+    def contract_graph_affine(self, scaleX, scaleY, fixedPoint):
+        for v in self.vertices:
+            # contract the x value, then the y value
+            self.vertices[v][1][0] = scaleX * (self.vertices[v][1][0] - fixedPoint[0]) + fixedPoint[0]
+            self.vertices[v][1][1] = scaleY * (self.vertices[v][1][1] - fixedPoint[1]) + fixedPoint[1]
 
     def combine_vertices(self, u, v):
         for n in self.vertices[v][0]:
@@ -49,9 +55,9 @@ class Graph:
         self.vertices.pop(v)
 
     def update_all_vertices_names(self, update):
-        self.vertices = {key+update: value for key, value in self.vertices.items()}
+        self.vertices = {key + update: value for key, value in self.vertices.items()}
         for v in self.vertices:
-            self.vertices[v][0] = [n+update for n in self.vertices[v][0]]
+            self.vertices[v][0] = [n + update for n in self.vertices[v][0]]
 
     def add_graph(self, gr):
         # copies all the Vertex objects from a graph to another graph
@@ -60,31 +66,22 @@ class Graph:
 
     def remove_redundancies(self):
         # combines any points with the same position
-        repeatedPoints = list()
-        seenPoints = list()
+        dictOfPositions = {}
+        listOfDuplicates = []
         for v in self.vertices:
-            neverSeen = True
-            for q in seenPoints:
-                if np.allclose(self.vertices[v][1], self.vertices[q][1]):
-                    repeatedPoints.append(v)
-                    neverSeen = False
-                    break
-            if neverSeen:
-                seenPoints.append(v)
-        for p in repeatedPoints:
-            for u in seenPoints:
-                if np.allclose(self.vertices[p][1], self.vertices[u][1]):
-                    self.combine_vertices(p, u)
-                    seenPoints.remove(u)
-                    break
+            posV = tuple(np.round(self.vertices[v][1], 10))
+            if posV in dictOfPositions:
+                listOfDuplicates.append([v, dictOfPositions[posV]])
+            else:
+                dictOfPositions[posV] = v
+        for pair in listOfDuplicates:
+            self.combine_vertices(pair[0], pair[1])
 
-    def apply_harmonic_function(self):
+    def apply_harmonic_function(self, desiredAccuracy):
         for v in self.vertices:
             self.vertices[v][2] = self.vertices[v][1][0]  # starts with the function f(x, y) = x
         greatestDifference = 1
-        desiredAccuracy = .01
         while greatestDifference > desiredAccuracy:
-            print(greatestDifference)
             greatestDifference = 0
             for u in self.vertices:
                 if not (self.vertices[u][2] == 0 or self.vertices[u][2] == 1):
@@ -93,6 +90,27 @@ class Graph:
                     for n in self.vertices[u][0]:
                         listOfHarmonicValues.append(self.vertices[n][2])
                     self.vertices[u][2] = np.mean(listOfHarmonicValues)
+                    differenceBetweenHarmonicValues = abs(oldHarmonicValue - self.vertices[u][2])
+                    if differenceBetweenHarmonicValues > greatestDifference:
+                        greatestDifference = differenceBetweenHarmonicValues
+
+    def apply_harmonic_function_affine(self):
+        for v in self.vertices:
+            self.vertices[v][2] = self.vertices[v][1][0]  # starts with the function f(x, y) = x
+        greatestDifference = 1
+        desiredAccuracy = .0001
+        while greatestDifference > desiredAccuracy:
+            greatestDifference = 0
+            for u in self.vertices:
+                if not (self.vertices[u][2] == 0 or self.vertices[u][2] == 1):
+                    oldHarmonicValue = copy.deepcopy(self.vertices[u][2])
+                    listOfWeights = []
+                    listOfWeightedHarmonicValues = []
+                    for n in self.vertices[u][0]:
+                        distanceToNeighbor = distance.euclidiean(self.vertices[u][1], self.vertices[n][1])
+                        listOfWeights.append(1 / distanceToNeighbor)
+                        listOfWeightedHarmonicValues.append(self.vertices[n][2] / distanceToNeighbor)
+                    self.vertices[u][2] = sum(listOfWeightedHarmonicValues) / sum(listOfWeights)
                     differenceBetweenHarmonicValues = abs(oldHarmonicValue - self.vertices[u][2])
                     if differenceBetweenHarmonicValues > greatestDifference:
                         greatestDifference = differenceBetweenHarmonicValues

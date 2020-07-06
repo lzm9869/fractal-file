@@ -3,7 +3,7 @@ import graphClasses as gc
 import copy
 
 #  INPUT HERE what level precarpet would you like?
-precarpet_level = 4
+precarpet_level = 2
 
 # building the level 0 cross carpet
 sC0 = gc.Graph()
@@ -31,19 +31,19 @@ listOfFixedPoints = [np.array([0, 0]),  # q0
                      np.array([0, 0.5])]  # q7
 
 for k in range(precarpet_level):
-    print("making level", k)
+    print("making level", k + 1)
     sCn = gc.Graph()
-    sCn.add_graph(sCn_plus_one)
+    sCn = copy.deepcopy(sCn_plus_one)
     sCn_plus_one = gc.Graph()
     for i in range(0, 8):
         copyOfSCn = copy.deepcopy(sCn)
         copyOfSCn.update_all_vertices_names(str(i))
         copyOfSCn.contract_graph(scalingFactor, listOfFixedPoints[i])
         sCn_plus_one.add_graph(copyOfSCn)
-        copyOfSCn
     sCn_plus_one.remove_redundancies()
 
-sCn_plus_one.apply_harmonic_function()
-sCn_plus_one.print_graph()
-sCn_plus_one.print_vertices_x_y_f()
+print("done constructing")
+sCn_plus_one.apply_harmonic_function(.0001)
+# sCn_plus_one.print_graph()
+# sCn_plus_one.print_vertices_x_y_f()
 print("Resistance of the graph is", sCn_plus_one.resistance_of_graph())
