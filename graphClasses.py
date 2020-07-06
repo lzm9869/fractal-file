@@ -1,6 +1,5 @@
 import numpy as np
 import copy
-from scipy.spatial import distance
 
 
 class Graph:
@@ -94,11 +93,10 @@ class Graph:
                     if differenceBetweenHarmonicValues > greatestDifference:
                         greatestDifference = differenceBetweenHarmonicValues
 
-    def apply_harmonic_function_affine(self):
+    def apply_harmonic_function_affine(self, desiredAccuracy):
         for v in self.vertices:
             self.vertices[v][2] = self.vertices[v][1][0]  # starts with the function f(x, y) = x
         greatestDifference = 1
-        desiredAccuracy = .0001
         while greatestDifference > desiredAccuracy:
             greatestDifference = 0
             for u in self.vertices:
@@ -107,7 +105,7 @@ class Graph:
                     listOfWeights = []
                     listOfWeightedHarmonicValues = []
                     for n in self.vertices[u][0]:
-                        distanceToNeighbor = distance.euclidiean(self.vertices[u][1], self.vertices[n][1])
+                        distanceToNeighbor = np.linalg.norm(self.vertices[u][1] - self.vertices[n][1])
                         listOfWeights.append(1 / distanceToNeighbor)
                         listOfWeightedHarmonicValues.append(self.vertices[n][2] / distanceToNeighbor)
                     self.vertices[u][2] = sum(listOfWeightedHarmonicValues) / sum(listOfWeights)

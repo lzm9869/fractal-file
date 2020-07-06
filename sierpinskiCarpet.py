@@ -9,7 +9,7 @@ precarpet_level = 2
 sC0 = gc.Graph()
 sC0.add_vertex("a", np.array([0, 0.5]))
 sC0.add_vertex("b", np.array([0.5, 1]))
-sC0.add_vertex("c", np.array([1, .5]))
+sC0.add_vertex("c", np.array([1, 0.5]))
 sC0.add_vertex("d", np.array([0.5, 0]))
 sC0.add_vertex("e", np.array([0.5, 0.5]))
 sC0.add_edge("a", "e")
@@ -32,7 +32,6 @@ listOfFixedPoints = [np.array([0, 0]),  # q0
 
 for k in range(precarpet_level):
     print("making level", k + 1)
-    sCn = gc.Graph()
     sCn = copy.deepcopy(sCn_plus_one)
     sCn_plus_one = gc.Graph()
     for i in range(0, 8):
