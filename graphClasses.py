@@ -17,7 +17,6 @@ class Graph:
             theCopy.vertices[v] = copy.deepcopy(self.vertices[v])
         return theCopy
 
-    # noinspection PyUnusedLocal
     def add_vertex(self, name, xyCoordinates):
         # allows you to add vertices to a graph
         # adds a new key to the vertices dictionary that refers to the list corresponding to the vertex
