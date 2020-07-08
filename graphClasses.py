@@ -1,5 +1,7 @@
 import numpy as np
 import copy
+import concurrent.futures as cf
+import time
 
 
 class Graph:
@@ -75,32 +77,24 @@ class Graph:
         for pair in listOfDuplicates:
             self.combine_vertices(pair[0], pair[1])
 
-    def apply_harmonic_function(self, desiredAccuracy):
+    def apply_harmonic_function(self, numRuns=500):
         for v in self.vertices:
             self.vertices[v][2] = self.vertices[v][1][0]  # starts with the function f(x, y) = x
-        greatestDifference = 1
-        while greatestDifference > desiredAccuracy:
-            greatestDifference = 0
+        for i in range(numRuns):
             for u in self.vertices:
                 if not (self.vertices[u][2] == 0 or self.vertices[u][2] == 1):
-                    oldHarmonicValue = copy.deepcopy(self.vertices[u][2])
                     listOfHarmonicValues = []
                     for n in self.vertices[u][0]:
                         listOfHarmonicValues.append(self.vertices[n][2])
                     self.vertices[u][2] = np.mean(listOfHarmonicValues)
-                    differenceBetweenHarmonicValues = abs(oldHarmonicValue - self.vertices[u][2])
-                    if differenceBetweenHarmonicValues > greatestDifference:
-                        greatestDifference = differenceBetweenHarmonicValues
 
-    def apply_harmonic_function_affine(self, desiredAccuracy):
+    def apply_harmonic_function_affine(self, numRuns=500):
+        starttime = time.time()
         for v in self.vertices:
             self.vertices[v][2] = self.vertices[v][1][0]  # starts with the function f(x, y) = x
-        greatestDifference = 1
-        while greatestDifference > desiredAccuracy:
-            greatestDifference = 0
+        for i in range(numRuns):
             for u in self.vertices:
                 if not (self.vertices[u][2] == 0 or self.vertices[u][2] == 1):
-                    oldHarmonicValue = copy.deepcopy(self.vertices[u][2])
                     listOfWeights = []
                     listOfWeightedHarmonicValues = []
                     for n in self.vertices[u][0]:
@@ -108,9 +102,24 @@ class Graph:
                         listOfWeights.append(1 / distanceToNeighbor)
                         listOfWeightedHarmonicValues.append(self.vertices[n][2] / distanceToNeighbor)
                     self.vertices[u][2] = sum(listOfWeightedHarmonicValues) / sum(listOfWeights)
-                    differenceBetweenHarmonicValues = abs(oldHarmonicValue - self.vertices[u][2])
-                    if differenceBetweenHarmonicValues > greatestDifference:
-                        greatestDifference = differenceBetweenHarmonicValues
+
+    def apply_harmonic_function_affine_parallelized(self, numRuns=10000):
+        for v in self.vertices:
+            self.vertices[v][2] = self.vertices[v][1][0]
+
+        def single_relaxation(s):
+            for u in s.vertices:
+                if not (s.vertices[u][2] == 0 or s.vertices[u][2] == 1):
+                    listOfWeights = []
+                    listOfWeightedHarmonicValues = []
+                    for n in s.vertices[u][0]:
+                        distanceToNeighbor = np.linalg.norm(s.vertices[u][1] - s.vertices[n][1])
+                        listOfWeights.append(1 / distanceToNeighbor)
+                        listOfWeightedHarmonicValues.append(s.vertices[n][2] / distanceToNeighbor)
+                    s.vertices[u][2] = sum(listOfWeightedHarmonicValues) / sum(listOfWeights)
+
+        with cf.ProcessPoolExecutor() as p:
+            p.map(single_relaxation(self), range(numRuns))
 
     def resistance_of_graph(self):
         totalOfSquaredDifferences = 0

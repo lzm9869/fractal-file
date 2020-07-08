@@ -62,12 +62,12 @@ for i in range(0, 8):
 aCn_plus_two.remove_redundancies()
 print("done constructing")
 
-aCn_plus_one.apply_harmonic_function_affine(.0005)
+aCn_plus_one.apply_harmonic_function_affine()
 # aCn_plus_one.print_graph()
 # aCn_plus_one.print_vertices_x_y_f()
 print("Resistance of the graph n is", aCn_plus_one.resistance_of_graph())
 
 # more rho code
-aCn_plus_two.apply_harmonic_function_affine(.0001)
+aCn_plus_two.apply_harmonic_function_affine()
 print("Resistance of the graph n+1 is", aCn_plus_two.resistance_of_graph())
 print("Rho is", aCn_plus_two.resistance_of_graph()/aCn_plus_one.resistance_of_graph())

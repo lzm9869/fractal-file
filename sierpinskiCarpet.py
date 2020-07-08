@@ -42,7 +42,7 @@ for k in range(precarpet_level):
     sCn_plus_one.remove_redundancies()
 
 print("done constructing")
-sCn_plus_one.apply_harmonic_function(.0001)
+sCn_plus_one.apply_harmonic_function()
 # sCn_plus_one.print_graph()
 # sCn_plus_one.print_vertices_x_y_f()
 print("Resistance of the graph is", sCn_plus_one.resistance_of_graph())

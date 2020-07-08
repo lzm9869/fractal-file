@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import copy
 import graphClasses as gc
 import numpy as np
@@ -7,9 +8,9 @@ from fractions import Fraction
 if __name__ == '__main__':
     #  INPUT HERE
     # what level affine carpet would you like:
-    precarpet_level = 5
+    precarpet_level = 3
     # how large would you like the center hole to be:
-    sideOfCenterHole = 1/2
+    sideOfCenterHole = 1 / 2
     # this is the only parameter, since sideOfCenterHole + 2*sideOfSmallSquares = 1 must be true
     sideOfSmallSquares = (1 - sideOfCenterHole) / 2
 
@@ -40,14 +41,10 @@ if __name__ == '__main__':
                                    [sideOfCenterHole, sideOfSmallSquares, np.array([0.5, 1])],  # q5
                                    [sideOfSmallSquares, sideOfSmallSquares, np.array([0, 1])],  # q6
                                    [sideOfSmallSquares, sideOfCenterHole, np.array([0, 0.5])]]  # q7
-    # variables for plotting
-    countingList = []
-    listOfResistances = []
 
     # making carpets and storing their resistances
     for k in range(precarpet_level):
         print("making level", k + 1)
-        countingList.append(k + 1)
         aCn = copy.deepcopy(aCn_plus_one)
         aCn_plus_one = gc.Graph()
         for i in range(0, 8):
@@ -57,19 +54,23 @@ if __name__ == '__main__':
                                             listOfContractionParameters[i][2])
             aCn_plus_one.add_graph(copyOfACn)
         aCn_plus_one.remove_redundancies()
-        aCn_plus_one.apply_harmonic_function_affine_parallelized(numRuns=10**k)
-        listOfResistances.append(aCn_plus_one.resistance_of_graph())
     print("done constructing")
 
-    plt.plot(countingList, listOfResistances, "bo")
-    coefficients = np.polyfit(countingList, listOfResistances, 2)
-    linearization = np.poly1d(coefficients)
-    plt.plot(countingList, linearization(countingList), "r--")
+    aCn_plus_one.apply_harmonic_function_affine_parallelized()
 
-    plt.title("Resistances of the " + str(Fraction(sideOfSmallSquares)) + "-Affine Crosswire Graph")
-    plt.xlabel("Fractal Level")
-    plt.ylabel("Resistance of Graph")
-    plt.xticks([0, 1, 2, 3, 4, 5, 6])
-    plt.yticks([0, 1, 2, 3, 4, 5, 6])
+    x = []
+    y = []
+    f = []
+    for v in aCn_plus_one.vertices:
+        x.append(aCn_plus_one.vertices[v][1][0])
+        y.append(aCn_plus_one.vertices[v][1][1])
+        f.append(aCn_plus_one.vertices[v][2])
+
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    ax.set_xlabel('y')
+    ax.set_ylabel('x')
+    ax.set_title(str(Fraction(sideOfSmallSquares)) + '-Affine Crosswire Graph of Level ' + str(precarpet_level))
+    ax.scatter(x, y, f)
 
     plt.show()
