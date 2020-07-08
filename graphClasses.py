@@ -103,24 +103,6 @@ class Graph:
                         listOfWeightedHarmonicValues.append(self.vertices[n][2] / distanceToNeighbor)
                     self.vertices[u][2] = sum(listOfWeightedHarmonicValues) / sum(listOfWeights)
 
-    def apply_harmonic_function_affine_parallelized(self, numRuns=10000):
-        for v in self.vertices:
-            self.vertices[v][2] = self.vertices[v][1][0]
-
-        def single_relaxation(s):
-            for u in s.vertices:
-                if not (s.vertices[u][2] == 0 or s.vertices[u][2] == 1):
-                    listOfWeights = []
-                    listOfWeightedHarmonicValues = []
-                    for n in s.vertices[u][0]:
-                        distanceToNeighbor = np.linalg.norm(s.vertices[u][1] - s.vertices[n][1])
-                        listOfWeights.append(1 / distanceToNeighbor)
-                        listOfWeightedHarmonicValues.append(s.vertices[n][2] / distanceToNeighbor)
-                    s.vertices[u][2] = sum(listOfWeightedHarmonicValues) / sum(listOfWeights)
-
-        with cf.ProcessPoolExecutor() as p:
-            p.map(single_relaxation(self), range(numRuns))
-
     def resistance_of_graph(self):
         totalOfSquaredDifferences = 0
         for v in self.vertices:

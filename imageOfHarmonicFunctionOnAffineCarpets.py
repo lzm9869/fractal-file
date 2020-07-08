@@ -4,6 +4,7 @@ import copy
 import graphClasses as gc
 import numpy as np
 from fractions import Fraction
+import time
 
 if __name__ == '__main__':
     #  INPUT HERE
@@ -56,8 +57,9 @@ if __name__ == '__main__':
         aCn_plus_one.remove_redundancies()
     print("done constructing")
 
-    aCn_plus_one.apply_harmonic_function_affine_parallelized()
-
+    startttime = time.time()
+    aCn_plus_one.apply_harmonic_function_affine()
+    print(time.time() - startttime)
     x = []
     y = []
     f = []
